@@ -1,0 +1,34 @@
+
+
+/** Creates a class exception for any invalid index that may arise within ListOrdered
+ *
+ * @author Joseph Walker
+ */
+public class InvalidIndexException extends Exception {
+    private int index;
+    private String method;
+    
+    /** Creates a default constructor with an invalid index
+     * 
+     * @param index the invalid index
+     */
+    public InvalidIndexException(int index, String method){
+        this.index = index;
+        this.method = method;
+    }
+    
+    /** getter for the index value
+     * 
+     * @return the index
+     */
+    public int getIndex() { return this.index; }
+    
+    /** A toString for the invalid index
+     * 
+     * @return 
+     */
+    @Override
+    public String toString(){
+        return "InvalidIndexException in " + method + ": index "  + index;
+    }
+}
