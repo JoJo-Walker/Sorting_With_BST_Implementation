@@ -1,0 +1,585 @@
+
+import java.util.ArrayList;
+import java.util.Comparator;
+
+/**
+ * A list of generic type objects stored in an array and maintained in order.
+ * "In order" means in the order defined in the compareTo method in class T.
+ * @author - Joseph Walker
+ */
+class ListOrdered<T extends Comparable<T>> {
+
+    /**
+     * maximum number of elements that can be stored in list maximum number of
+     * elements that can be stored in list
+     */
+    private static final int DEFAULT_CAPACITY = 10;
+
+    /**
+     * current number of elements in list current number of elements in list
+     */
+    private int numberOfItems = 0;
+
+    /**
+     * basic data structure to hold list elements basic data structure to hold
+     * list elements
+     */
+    private T[] items = null;
+
+    /**
+     * Constructor with user-defined capacity of list Constructor with
+     * user-defined capacity of list
+     */
+    public ListOrdered(int size) {
+        /* A declaration of an array like below is generally not advised!!
+    If you were not trying to learn about data structures and how they are implemented, you would use one of Java's Collections classes (e.g. ArrayList, LinkedList, etc.).
+         */
+        @SuppressWarnings("unchecked")
+        T[] temp = (T[]) new Comparable[size];
+        items = temp;
+    }
+
+    /**
+     * Constructor with default capacity of list Constructor with default
+     * capacity of list
+     */
+    public ListOrdered() {
+        this(DEFAULT_CAPACITY);
+    }
+
+    /* CAREFUL not to mix up ListOrdered.length() with items.length.
+  The method length() is returning the number of elements in the list,
+  whereas the member variable length of items is the capacity of the list. */
+    public int length() {
+        return numberOfItems;
+    }
+
+    /**
+     * True if no elements in the list. True if no elements in the list.
+     */
+    public boolean isEmpty() {
+        return numberOfItems == 0;
+    }
+
+    /**
+     * True if list is filled to capacity True if list is filled to capacity
+     */
+    public boolean isFull() {
+        return numberOfItems == items.length;
+    }
+
+    /**
+     * string of all list elements
+     *
+     * @return string of all list elements, 1 per line.
+     */
+    public String toString() {
+        String returnString = "";
+        for (int i = 0; i < numberOfItems; i++) {
+            returnString += items[i].toString() + "\n";
+        }
+        return returnString;
+    } // end toString()
+    
+    /** The default comparator
+     * 
+     */
+    private Comparator<T> sortOrder = new Comparator<T>() {
+        /**The default compare
+         * 
+         */
+        @Override
+        public int compare(T ob1, T ob2) {
+            return ob1.compareTo(ob2);
+        }
+    };
+
+    /**
+     * Getter for list element at a specific index. Getter for list element at a
+     * specific index. Essential for testing.
+     *
+     * @param index Location of element to return (without removal).
+     * @return list element at index, if index valid (null if not valid)
+     */
+    public T get(int index)throws InvalidIndexException {
+        if (index < 0 || index >= numberOfItems) {
+            throw new InvalidIndexException(index, "remove(int index)");
+        }
+        return items[index];
+    } // end get(int)
+
+    /**
+     * Remove element at provided index (if valid Remove element at provided
+     * index (if valid), shifting elements so no gaps. NOTE that this is
+     * private.
+     *
+     * @param index Location of element to remove.
+     * @return removed element (or null if index out of bounds).
+     */
+    private T remove(int index) throws NullObjectException, InvalidIndexException {
+        if (index < 0 || index >= numberOfItems) {
+            throw new InvalidIndexException(index, "remove(int index)");
+        }
+        T temp = items[index];
+        for (int i = index; i < numberOfItems - 1; i++) {
+            items[i] = items[i + 1];
+        }
+        --numberOfItems;
+        items[numberOfItems] = null;
+        return temp;
+    } // end remove(int)
+
+    /**
+     * Add element at provided index (if valid), shifting elements to the right
+     * from index to the end to make room Add element at provided index (if
+     * valid), shifting elements to the right from index to the end to make
+     * room. Note that this is private.
+     *
+     * @param object to be added at provided index (if valid)
+     * @param index Location of where to add element
+     */
+    private void add(T object, int index) throws NullObjectException, InvalidIndexException{
+        if(object == null) {
+            throw new NullObjectException( "add(T Object, int index)");
+        }
+        if (index < 0 || index > numberOfItems) {
+            throw new InvalidIndexException(index, "add(T object, int index)");
+        }
+        for (int i = numberOfItems; i > index; i--) {
+            items[i] = items[i - 1];
+        }
+        items[index] = object;
+        ++numberOfItems;
+    } // end add(T, int)
+
+    /**
+     * Remove all elements in the list, replacing each with null. Remove all
+     * elements in the list, replacing each with null.
+     */
+    public void clear() {
+        for (int i = 0; i < numberOfItems; i++) {
+            items[i] = null;
+        }
+        numberOfItems = 0;
+    } // end clear()
+
+    /**
+     * An equals function for an object. An equals function for an object.
+     *
+     * @param object T - the object to compare to.
+     * @return True or False
+     */
+    public boolean contains(T object) throws NullObjectException {
+        if(object == null) {
+            throw new NullObjectException( "containsT Object)");
+        }
+        return this.equals(object);
+    } // end contains(T)
+
+    /**
+     * Adds an object in order with no Duplicates. Adds an object in order.
+     *
+     * @param object T -the object to add
+     */
+    public void add(T object) throws NullObjectException {
+        int move = 0;
+        if(object == null) {
+            throw new NullObjectException( "add(T Object)");
+        }
+        int i = 0;
+        if (isFull()) {
+            increaseCapacity();
+        }
+        try {
+        if (isEmpty()) {
+            add(object, i);
+            return;
+        }
+        while (sortOrder.compare(items[i], object) < 0) {
+            i++;
+            if (i == numberOfItems) {
+                add(object, numberOfItems);
+                return;
+            }
+
+        }
+        if (sortOrder.compare(items[i], object) == 0) {
+            return;
+        }
+        add(object, i);
+        } catch (InvalidIndexException e) {
+            System.out.println(e);
+        }
+    } // end add(T)
+
+    /**
+     * Removes a specific item Currently removing at the end, but change to
+     * remove specific item. Use compareTo or equals or find.
+     *
+     * @param object T - the object to remove
+     */
+    public void remove(T object) throws NullObjectException, InvalidIndexException {
+        int i = 0;
+        if(object == null) {
+            throw new NullObjectException( "remove(T Object)");
+        }
+        if (isEmpty()) {
+            return;
+        }
+        Student checkStu = (Student) object;
+        try {
+        while (i < numberOfItems) {
+            Student tester = (Student) items[i];
+            if (sortOrder.compare((T) tester.id(), (T) checkStu.id()) == 0) {
+                remove(i);
+            }
+            i++;
+        }
+        } catch (InvalidIndexException e) {
+            System.out.println(e);
+        }
+    } // end remove(T)
+
+    /**
+     * A binary search for an object. A binary search for an object.
+     *
+     * @param object T - the object to search for
+     * @return int - the index of the value
+     */
+    public int find(T object) throws NullObjectException {
+        if(object == null) {
+            throw new NullObjectException( "find(T Object)");
+        }
+        if (isEmpty()) {
+            return -1;
+        }
+        int max = numberOfItems - 1;
+        int mid = numberOfItems / 2;
+        int min = 0;
+
+        while (max >= min) {
+            mid = (max + min) / 2;
+            if (sortOrder.compare(items[mid], object) < 0) {
+                min = mid + 1;
+            } else if (sortOrder.compare(items[mid], object) > 0) {
+                max = mid - 1;
+            } else {
+                return mid;
+            }
+        }
+        return -1;
+
+    } // end find(T)
+
+    /**
+     * A Linear search for an object. A Linear search for an object
+     *
+     * @param object T - the object to find
+     * @param comp Comparator - to determine how to search
+     * @return int - the index of the value
+     */
+    public int find(T object, Comparator<T> comp) throws NullObjectException {
+        if(object == null) {
+            throw new NullObjectException( "remove(T Object)");
+        }
+        for (int i = 0; i < numberOfItems; i++) {
+            if (comp.compare(items[i], object) == 0) {
+                return i;
+            }
+        }
+        return -1;
+    } // end find(T,Comparator)
+
+    /**
+     * Gets rid of the items within the list at a given range. Gets rid of the
+     * items within the list.
+     *
+     * @param object1 T - the object initial value to begin removing
+     * @param object2 T - the object to end removing from
+     * @param comp Comparator - for what is to be compared.
+     */
+    ////////Adjust/////
+    public void removeRange(T key1, T key2, Comparator<T> comp) throws NullObjectException, InvalidIndexException {
+        if(key1 == null || key2 == null) {
+            throw new NullObjectException( "removeRange(T object1, T object2, Comparator<T> comp)");
+        }
+        if (isEmpty()) {
+            return;
+        }
+        int i = 0;
+        try {
+        while (items[i] != null) {
+            if ((comp.compare(((T) key1), items[i]) <= 0) && (comp.compare(((T) key2), items[i]) >= 0)) {
+                remove(i);
+            }
+        }
+        } catch (InvalidIndexException e) {
+            System.out.println(e);
+        }
+    } // end removeRange()
+
+    //////////////////////////////////////////////////////////////////////////////
+    /////////////////////Project 2 Methods////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////
+    /**The method to reorder the list based on the given comparator
+     * 
+     * @param comp  the comparator to reorder
+     */
+    public void reorder(Comparator<T> comp) {
+        sortOrder = comp;
+        sort(this);
+    }
+
+    /** A selection sort method
+     * 
+     * @param <T> basic type T
+     * @param listToSort the list to sort
+     */
+    public static <T extends Comparable<T>> void sort(ListOrdered<T> listToSort) {
+        for (int i = 0; i < listToSort.length() - 1; ++i) {
+
+            // Find index of smallest remaining element
+            int indexSmallest = i;
+            for (int j = i + 1; j < listToSort.length(); ++j) {
+
+                if (listToSort.sortOrder.compare(listToSort.items[j], listToSort.items[indexSmallest]) < 0) {
+                    indexSmallest = j;
+                }
+            }
+
+            // Swap numbers[i] and numbers[indexSmallest]
+            T temp = listToSort.items[i];
+            listToSort.items[i] = listToSort.items[indexSmallest];
+            listToSort.items[indexSmallest] = temp;
+        }
+    }
+
+    /**Selection sort method with a specific comparator
+     * 
+     * @param <T> T basic type
+     * @param listToSort the list to short
+     * @param comp  - the comparator to sort
+     */
+    public static <T extends Comparable<T>> void sort(ListOrdered<T> listToSort, Comparator<T> comp) {
+        for (int i = 0; i < listToSort.length() - 1; ++i) {
+
+            // Find index of smallest remaining element
+            int indexSmallest = i;
+            for (int j = i + 1; j < listToSort.length(); ++j) {
+
+                if (comp.compare(listToSort.items[j], listToSort.items[indexSmallest]) < 0) {
+                    indexSmallest = j;
+                }
+            }
+
+            // Swap numbers[i] and numbers[indexSmallest]
+            T temp = listToSort.items[i];
+            listToSort.items[i] = listToSort.items[indexSmallest];
+            listToSort.items[indexSmallest] = temp;
+        }
+    }
+
+    /**
+     * takes the items in ListOrder, sorts them and creates a new ArrayList
+     * @param comp the comparator to sort with
+     * @return the new sorted ArrayList
+     */
+    public ArrayList<T> sort(Comparator<T> comp) throws InvalidIndexException, NullObjectException {
+        ArrayList<T> list = new ArrayList<T>(length());
+        ListOrdered<T> tempList = new ListOrdered<T>(length());
+        
+        for (int i = 0; i < length(); i++) {
+            tempList.add(items[i]);
+        }
+
+         tempList.reorder(comp);
+
+        for (int i = 0; i < length(); i++) {
+            list.add(tempList.items[i]);
+        }
+
+        return list;
+    }
+
+    /** Grabs all the items in the list with the same key value
+     * 
+     * @param key the identifier to grab items
+     * @param comp the comparator to search
+     * @return New ArrayList
+     */
+    public ArrayList<T> getAll(Object key, Comparator<T> comp) {
+        ArrayList<T> list = new ArrayList<T>(length());
+
+        for (int i = 0; i < length(); i++) {
+            if (comp.compare((T) key, items[i]) == 0) {
+                list.add(items[i]);
+            }
+        }
+
+        return list;
+    }
+
+    /** Get first instance of where the value is
+     * 
+     * @param key the key to check with
+     * @param comp the comparator to search with
+     * @return T the basic data type
+     */
+    public T getFirst(Object key, Comparator<T> comp) {
+        T temp = null;
+        int i = 0;
+        while (temp == null) {
+            if (comp.compare((T) key, items[i]) == 0) {
+                temp = items[i];
+            }
+            i++;
+        }
+
+        return temp;
+    }
+
+    /**Gets a specific range of items from the list
+     * 
+     * @param key1 the initial value
+     * @param key2 the end value
+     * @param comp the comparator to search with
+     * @return the new ArrayList
+     */
+    public ArrayList<T> getRange(Object key1, Object key2, Comparator<T> comp) {
+        ArrayList<T> list = new ArrayList<T>(length());
+
+        for (int i = 0; i < length(); i++) {
+            if ((comp.compare(((T) key1), items[i]) <= 0) && (comp.compare(((T) key2), items[i]) >= 0)) {
+                list.add(items[i]);
+            }
+        }
+        return list;
+    }
+
+    /** Retains a range given within the ListOrdered
+     * 
+     * @param key1 - the initial key
+     * @param key2 - the ending key
+     * @param comp the comparator to search with
+     */
+    public void retainRange(Object key1, Object key2, Comparator<T> comp) throws InvalidIndexException, NullObjectException {
+        int i = 0;
+        try{
+        while (items[i] != null) {
+            if (comp.compare((T) key1, items[i]) > 0 || comp.compare((T) key2, items[i]) < 0) {
+                remove(i);
+                continue;
+            }
+            i++;
+        }
+        } catch (InvalidIndexException e) {
+            System.out.println(e);
+        }
+
+    }
+
+    /** Creates a new array with the items in ListOrder
+     * 
+     * @return T[] - the newly created array
+     */
+    public T[] toArray() {
+        if (isEmpty()) {
+            System.out.println("FAILURE IN TOARRAY(T[] ARRAY): List is empty.");
+            return null;
+        }
+        @SuppressWarnings("unchecked")
+        T[] array = (T[]) new Object[numberOfItems];
+        int index = 0;
+        for (int i = 0; i < numberOfItems; i++) {
+            array[i] = items[i];
+        }
+        return array;
+    }
+
+    /** Trims the array to a size of 10 or a multiple of 10.
+     * 
+     */
+    public void trimToSize() {
+        int base = numberOfItems / 10;
+        int rem = numberOfItems % 10;
+        
+        if (rem > 0) {
+            @SuppressWarnings("unchecked")
+            T[] temp = (T[]) new Comparable[(base * 10) + 10];
+            for (int i = 0; i < numberOfItems; i++) {
+                temp[i] = items[i];
+            }
+            items = temp;
+        }
+    }
+    
+    /**Increases the capacity of the array
+     * 
+     */
+    private void increaseCapacity() {
+        int increment = numberOfItems + 10;
+        @SuppressWarnings("unchecked")
+        T[] temp = (T[])new Comparable[increment];
+        for (int i = 0; i < numberOfItems; i++) {
+            temp[i] = items[i];
+        }
+        items = temp;
+    }
+    
+    /** Searches for the max value in items
+     * 
+     * @return T the max value
+     */
+    public T max() {
+        return max(sortOrder);
+    }
+
+    /** Searches for the min value in items
+     * 
+     * @return the min value
+     */
+    public T min() {
+        return min(sortOrder);
+    }
+
+   /**Searches for the max value in items with a comparator
+    * 
+    * @param comp the comparator to search with
+    * @return the max value
+    */
+    public T max(Comparator<T> comp) {
+        if (isEmpty()) {
+            System.out.println("Error");
+            return null;
+        }
+        T max = items[0];
+        for (int i = 0; i < length(); i++) {
+            int value = comp.compare(items[i], max);
+            if (value > 0) {
+                max = items[i];
+            }
+        }
+        return max;
+    }
+
+    /**Searches for the min value in items with a comparator
+     * 
+     * @param comp the comparator to search with
+     * @return the min value
+     */
+    public T min(Comparator<T> comp) {
+        if (isEmpty()) {
+            System.out.println("Error");
+            return null;
+        }
+        T min = items[0];
+        for (int i = 0; i < length(); i++) {
+            int value = comp.compare(min, items[i]);
+            if (value > 0) {
+                min = items[i];
+            }
+        }
+        return min;
+    }
+
+}
