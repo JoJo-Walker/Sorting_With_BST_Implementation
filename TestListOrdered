@@ -1,0 +1,396 @@
+///Author - Joseph Walker
+
+import java.util.ArrayList;
+import java.util.Comparator;
+
+public class TestListOrdered {
+
+    static ListOrdered<Student> students = new ListOrdered<>(5);
+
+    static Student s1 = new Student("Amy", "Larson", Major.CSC);
+    static Student s2 = new Student("Mari", "Jones");
+    static Student s3 = new Student("Jai", "Abid", Major.ART);
+    static Student s4 = new Student("Inez", "Zeus", Major.CSC);
+    static Student s5 = new Student("Su", "Quin", Major.MUS);
+    static Student s6 = new Student("Nina", "Martin");
+    static Student s7 = new Student("Holly", "Trolly");
+    static Student s8 = new Student("Gef", "Bar");
+    static Student keyOnly = new Student("key", "only");
+
+    static Comparator<Student> compLast = new Comparator<>() {
+
+        public int compare(Student key, Student s) {
+            return key.last().toLowerCase().compareTo(s.last().toLowerCase());
+        }
+    };
+
+    static Comparator<Object> compKeyLast = new Comparator<>() {
+
+        public int compare(Object ob, Object stu) {
+            String key = (String) ob;
+            Student s = (Student) stu;
+            return key.toLowerCase().compareTo(s.last().toLowerCase());
+        }
+    };
+
+    static Comparator<Student> compFirst = new Comparator<>() {
+
+        public int compare(Student key, Student s) {
+            return key.first().toLowerCase().compareTo(s.first().toLowerCase());
+        }
+    };
+
+    static Comparator<Object> compKeyFirst = new Comparator<>() {
+
+        public int compare(Object ob, Object stu) {
+            String key = (String) ob;
+            Student s = (Student) stu;
+            return key.toLowerCase().compareTo(s.first().toLowerCase());
+        }
+    };
+
+    // Potential issue is subtraction*********************************************
+    static Comparator<Student> compID = new Comparator<>() {
+
+        public int compare(Student key, Student s) {
+            return key.id() - s.id();
+        }
+    };
+
+    static Comparator<Object> compKeyId = new Comparator<>() {
+
+        public int compare(Object ob, Object stu) {
+            int key = (int) ob;
+            Student s = (Student) stu;
+            return key - s.id();
+        }
+    };
+
+    static Comparator<Student> compName = new Comparator<>() {
+
+        public int compare(Student key, Student s) {
+            return key.last().toLowerCase().compareTo(s.last().toLowerCase());
+        }
+    };
+
+    static Comparator<Student> compMajor = new Comparator<>() {
+
+        public int compare(Student key, Student s) {
+            return key.major().compareTo(s.major());
+        }
+    };
+    
+    static Comparator<Object> compKeyMajor = new Comparator<>() {
+
+        public int compare(Object obj, Object stu) {
+            Major key = (Major)obj;
+            Student s = (Student)stu;
+            return key.compareTo(s.major());
+        }
+    };
+
+    static Comparator<Student> compGpa = new Comparator<>() {
+
+        public int compare(Student key, Student s) {
+            if ((Math.abs(key.gpa() - s.gpa())) < .0009) {
+                return 0;
+            }
+            if ((key.gpa() - s.gpa()) > 0) {
+                return 1;
+            }
+            return -1;
+        }
+    };
+
+    static Comparator<Object> compKeyGpa = new Comparator<>() {
+
+        public int compare(Object obj, Object stu) {
+            Double key = (Double)obj;
+            Student s = (Student)stu;
+            if ((Math.abs(key - s.gpa())) < .009) {
+                return 0;
+            }
+            if ((key - s.gpa()) > 0) {
+                return 1;
+            }
+            return -1;
+        }
+    };
+    
+    public static void testArrayListSort() throws NullObjectException, InvalidIndexException {
+        students.clear();
+        students.add(s1);
+        students.add(s2);
+        students.add(s3);
+        students.add(s4);
+        students.add(s5);
+        ArrayList<Student> temp = new ArrayList<>();
+        temp = students.sort(compGpa);
+        
+        System.out.println("-----------------------------Testing testArrayListSort//visual inspection, ensure gpa is ");
+        if (temp.size() != 5) {  // this is looking for object at same address
+         System.out.println("List Sort test total: "+temp.size()+" expected "+5);
+        }
+        System.out.println(temp);
+    }
+    
+    public static void main(String[] args) throws NullObjectException, InvalidIndexException {
+        System.out.println("\n*******    TestListOrdered.test     ************");
+        testLength();
+        testAdd();
+        testNoDuplicates();
+        testCapacity();
+        testRemove();
+        testFindBinary();
+        testFindLinear();
+        testArrayListSort();
+        System.out.println();
+    } // end test()
+
+    public static void testLength() throws NullObjectException, InvalidIndexException {
+        System.out.println("\n----------------------------- testLength() ---");
+        students.clear();
+        if (0 != students.length()) {
+            System.out.println("Length clear: " + students.length() + " expected 0");
+        }
+        students.add(s1);
+        if (1 != students.length()) {
+            System.out.println("Length add at [0]: " + students.length() + " expected 1");
+        }
+        students.add(s2);
+        if (2 != students.length()) {
+            System.out.println("Length add at [1]: " + students.length() + " expected 2");
+        }
+        students.remove(s1);
+        if (1 != students.length()) {
+            System.out.println("Length remove at [0]: " + students.length() + " expected 1");
+        }
+        students.remove(s2);
+        if (0 != students.length()) {
+            System.out.println("Length remove at [1]: " + students.length() + " expected 0");
+        }
+    } // end testLength()
+
+    public static void testNoDuplicates() throws NullObjectException {
+        System.out.println("\n------------------------- testNoDuplicates() ---");
+        students.clear();
+        if (0 != students.length()) {
+            System.out.println("Length clear: " + students.length() + " expected 0");
+        }
+        students.add(s1);
+        keyOnly.id(s1.id());
+        students.add(keyOnly);
+        if (1 != students.length()) {
+            System.out.println("No Dups no add: " + students.length() + " expected 1");
+        }
+        // test that a student with the same name but different id does not match
+        int length = students.length();
+        students.add(s2);
+        students.add(new Student("Mari", "Jones"));
+        if (length + 2 != students.length()) {
+            System.out.println("No Dups add: " + students.length() + " expected " + (length + 2));
+        }
+    } // end testNoDuplicates()
+
+    public static void testAdd() throws NullObjectException, InvalidIndexException {
+        /**
+         * Testing add to list at ends and middle, maintaining order
+         */
+        System.out.println("\n---------------------------------- testAdd() ---");
+        students.clear();
+
+        students.add(s2);
+        if (students.get(0) != s2) {  // this is looking for object at same address
+            System.out.println("Add to empty at [0]: " + students.get(0) + " expected " + s2.toString());
+        }
+        students.add(s1);
+        if (students.get(0) != s1) {  // this is looking for object at same address
+            System.out.println("Add at [0] with 1 element: " + students.get(0) + " expected " + s1.toString());
+        }
+        students.add(s5);
+        if (students.get(2) != s5) {  // this is looking for object at same address
+            System.out.println("Add to last at [2]: " + students.get(2) + " expected " + s5.toString());
+        }
+        students.add(s3);
+        if (students.get(2) != s3) {  // this is looking for object at same address
+            System.out.println("Add middle at [2]: " + students.get(2) + " expected " + s3.toString());
+        }
+    }
+
+    public static void testCapacity() throws NullObjectException, InvalidIndexException {
+        System.out.println("\n------------------------------ testCapacity() ---");
+        students.clear();
+        students.add(s1);
+        students.add(s2);
+        students.add(s3);
+        students.add(s4);
+        students.add(s5);
+        if (5 != students.length()) {
+            System.out.println("Capacity Full length: " + students.length() + " expected 5");
+        }
+        students.add(s6);
+        students.add(s7);
+        students.add(s8);
+        if (students.get(4) != s5) {
+            System.out.println("Capacity Over element: " + students.get(4) + " expected " + s5);
+        }
+
+    } // end testAddUpToLimit
+
+    public static void testRemove() throws NullObjectException, InvalidIndexException {
+        System.out.println("\n ------------------------------ testRemove() --- ");
+        students.clear();
+        students.add(s1);
+        students.add(s2);
+        students.add(s3);
+        students.add(s4);
+
+        if (students.get(0) != s1) {
+            System.out.println("Remove Confirm init [0]: " + students.get(0) + " expected " + s1);
+        }
+        if (students.get(1) != s2) {
+            System.out.println("Remove Confirm init [1]: " + students.get(1) + " expected " + s2);
+        }
+        if (students.get(2) != s3) {
+            System.out.println("Remove Confirm init [2]: " + students.get(2) + " expected " + s3);
+        }
+        if (students.get(3) != s4) {
+            System.out.println("Remove Confirm init [3]: " + students.get(3) + " expected " + s4);
+        }
+        // Order of list confirmed to be s1, s2, s3, s4
+
+        keyOnly.id(s2.id());
+        students.remove(keyOnly);
+        // Now list should be s1 s3 s4
+        if (students.get(1) != s3) {
+            System.out.println("Remove Middle: " + students.get(1) + " expected " + s3);
+        }
+
+        keyOnly.id(s1.id());
+        students.remove(keyOnly);
+        // Now list should be s3 s4
+        if (students.get(0) != s3) {
+            System.out.println("Remove First " + students.get(0) + ". Expected " + s3);
+        }
+        keyOnly.id(s4.id());
+        students.remove(keyOnly);
+        // Now list should be s3
+        if (students.get(0) != s3) {
+            System.out.println("Remove Last " + students.get(0) + ". Expected " + s3);
+        }
+        keyOnly.id(s3.id());
+        students.remove(s3);
+        // Now list should be empty
+        if (!students.isEmpty()) {
+            System.out.println("Remove Only Element, but not empty");
+        }
+    } // end testRemove
+
+    public static void testFindBinary() throws NullObjectException {
+        System.out.println("\n --------------------------- testFindBinary() --- ");
+        students.clear();
+        students.add(s1);
+        students.add(s2);
+        students.add(s3);
+        students.add(s4);
+        students.add(s5);
+
+        int index;
+        index = students.find(s6);
+        if (index != -1) {
+            System.out.println("Find Binary not in list " + index + ". Expected -1");
+        }
+        keyOnly.id(s1.id());
+        index = students.find(keyOnly);
+        if (index != 0) {
+            System.out.println("Find Binary First. " + index + " expected 0");
+        }
+        keyOnly.id(s5.id());
+        index = students.find(keyOnly);
+        if (index != 4) {
+            System.out.println("Find Binary Last. " + index + " expected 4");
+        }
+        keyOnly.id(s3.id());
+        index = students.find(keyOnly);
+        if (index != 2) {
+            System.out.println("Find Binary Middle. " + index + " expected 2");
+        }
+    } // end testFindBinary()
+
+    public static void testFindLinear() throws NullObjectException {
+        System.out.println("\n --------------------------- testFindLinear() --- ");
+        students.clear();
+        students.add(s1);
+        students.add(s2);
+        students.add(s3);
+        students.add(s4);
+
+        int index;
+
+        // Create comparator for last name.
+        index = students.find(keyOnly, compName);
+        if (index != -1) {
+            System.out.println("Find Linear name not in list. " + index + " expected -1");
+        }
+        keyOnly.last(s1.last().toLowerCase());
+        keyOnly.first(s1.first().toUpperCase());
+        index = students.find(keyOnly, compName);
+        if (index != 0) {
+            System.out.println("Find Linear name. " + index + " expected 0");
+        }
+        keyOnly.last(s3.last());
+        keyOnly.first(s3.first());
+        index = students.find(keyOnly, compName);
+        if (index != 2) {
+            System.out.println("Find Linear name. " + index + " expected 2");
+        }
+        keyOnly.last(s4.last());
+        keyOnly.first(s4.first());
+        index = students.find(keyOnly, compName);
+        if (index != 3) {
+            System.out.println("Find Linear name. " + index + " expected 3");
+        }
+
+        // Create comparator for major.
+        keyOnly.major(Major.CHE);
+        index = students.find(keyOnly, compMajor);
+        if (index != -1) {
+            System.out.println("Find Linear major in list. " + index + " expected -1");
+        }
+        keyOnly.major(s1.major());
+        index = students.find(keyOnly, compMajor);
+        if (index != 0) {
+            System.out.println("Find Linear major. " + index + " expected 0");
+        }
+        keyOnly.major(s2.major());
+        index = students.find(keyOnly, compMajor);
+        if (index != 1) {
+            System.out.println("Find Linear major. " + index + " expected 1");
+        }
+
+        // Create Comparator for gpa. These are doubles, so for equality, use this:
+        //    if (Math.abs(f1 - f2) < THRESHOLD), defining a threshold of .009
+        // https://howtodoinjava.com/java/basics/correctly-compare-float-double/
+        index = students.find(s6, compGpa);
+        if (index != -1) {
+            System.out.println("Find Linear gpa not in list. " + index + " expected -1");
+        }
+        keyOnly.gpa(s1.gpa() + .0001);
+        index = students.find(keyOnly, compGpa);
+        if (index != 0) {
+            System.out.println("Find Linear gpa. " + index + " expected 0");
+        }
+        keyOnly.gpa(s2.gpa() + .0001);
+        index = students.find(keyOnly, compGpa);
+        if (index != 1) {
+            System.out.println("Find Linear gpa. " + index + " expected 1");
+        }
+        keyOnly.gpa(s4.gpa() + .0001);
+        index = students.find(keyOnly, compGpa);
+        if (index != 3) {
+            System.out.println("Find Linear gpa. " + index + " expected 3");
+        }
+
+    } // end testFindLinear()
+
+} // end class Teststudents
