@@ -1,0 +1,31 @@
+
+/** Creates a null pointer exception in ListOrdered
+ *
+ * @author joseph Walker
+ */
+public class NullObjectException extends Exception{
+    private String method;
+    
+    /** Default constructor for the null object exception
+     * 
+     * @param Method  the method the error occurred
+     */
+    public NullObjectException(String Method) {
+        this.method = method;
+    }
+    
+    /** Getter for the method
+     * 
+     * @return the method
+     */
+    public String getMethod() { return this.method; }
+    
+    /** A toString function
+     * 
+     * @return  the String 
+     */
+    @Override
+    public String toString() {
+        return "NullObjectException in " + method; 
+    }
+}
