@@ -1,0 +1,224 @@
+///////////////////////////////Not The Author////////////////////
+
+import java.util.*;
+import java.util.Random;
+
+/**
+ * Basic Student class to hold relevant data for a college student. Makes use of
+ * the enumerated type Major (in the file Major.java). Must implement
+ * compareTo(), which defines the default key field (to be used with
+ * ListOrdered), and equals (to be used with ListOrdered).
+ */
+public class Student implements Comparable<Student> {
+
+    /**
+     * Unique ID for each new Student
+     */
+    private static Integer nextId = 100100;
+
+    /**
+     * Generate new unique id
+     *
+     * @return unique id
+     */
+    public static int getNewID() {
+        ++nextId;
+        return nextId;
+    }
+
+    /**
+     * last name
+     */
+    private String last;
+    /**
+     * first name
+     */
+    private String first;
+    /**
+     * major (enum type)
+     */
+    private Major major = Major.UNDECLARED;
+    /**
+     * unique student id
+     */
+    private Integer id = null;
+    /**
+     * grade point average
+     */
+    private Double gpa = 0.0;
+
+    // Used to generate random gpa's for students for testing.
+    static private final Random random = new Random();
+
+    /**
+     * Constructor with student name and major. Creates unique id.
+     *
+     * @param inFirst first name
+     * @param inLast last name
+     * @param inMajor declared major (default enum UNDECLARED)
+     */
+    public Student(String inFirst, String inLast, Major inMajor) {
+        first = inFirst;
+        last = inLast;
+        major = inMajor;
+        id = getNewID();
+
+        // Generate random gpa for testing purposes.
+        gpa = Double.valueOf(random.nextInt(4) + random.nextDouble());
+    }
+
+    /** Constructor with student name only.
+     * Constructor with student name only.
+     * "Major" default enum UNDECLARED.Calls other constructor to create unique id.
+     * @param inFirst String - the first name of the student
+     * @param inLast String - the last name of the student
+     */
+    public Student(String inFirst, String inLast) {
+        this(inFirst, inLast, Major.UNDECLARED);
+    }
+
+    /** A toString for the Student class
+     * print example: 1001001 Larson, Amy : CSC (3.821)
+     * @return - gives back a formatted student string
+     */
+    @Override
+    public String toString() {
+        String gpa = String.format("%.3f", gpa());
+        return id() + " " + last() + ", " + first() + " : " + major + " (" + gpa + ")";
+    }
+
+    /**
+     * Getter for both first and last name
+     * @return String - the full name
+     */
+    public String fullName() {
+        return first + " " + last;
+    }
+
+    /**
+     * Member variable getter
+     * @return String - the last name
+     */
+    public String last() {
+        return last;
+    }
+
+    /**
+     * Member variable getter
+     * @return String - the first name
+     */
+    public String first() {
+        return first;
+    }
+
+    /**
+     * Member variable getter
+     * @return String - the major
+     */
+    public Major major() {
+        return major;
+    }
+
+    /**
+     * Member variable getter
+     * @return int - the id number
+     */
+    public Integer id() {
+        return id;
+    }
+
+    /**
+     * Member variable getter
+     * @return Double - a double for the GPA value
+     */
+    public Double gpa() {
+        return gpa;
+    }
+
+    /**
+     * Member variable setter
+     * @param newMajor ENUM MAJOR - to adjust a major for the student
+     */
+    public void major(Major newMajor) {
+        major = newMajor;
+    }
+
+    /**
+     * Member variable setter
+     * @param newGPA Double - the new GPA for the student
+     */
+    public void gpa(Double newGPA) {
+        gpa = newGPA;
+    }
+
+    /**
+     * Member variable setter
+     * @param newLast String - for a last name change
+     */
+    public void last(String newLast) {
+        last = newLast;
+    }
+
+    /**
+     * Member variable setter
+     * @param newFirst String - for the first name change
+     */
+    public void first(String newFirst) {
+        first = newFirst;
+    }
+
+    /**
+     * Member variable setter.
+     * @param n - integer for the ID.
+     */
+    public void id(Integer n) {
+        id = n;
+    }
+
+    /** A compare of the students ID.
+     * Compares the student Id of this object to the given students id to see if
+     * they are greater or the same or less.
+     * @param s Student - the students id to test
+     * @return Int - either 0, -1, or 1
+     */
+    @Override
+    public int compareTo(Student s) {
+        return this.id.compareTo(s.id);
+    }
+    
+//    /** A compare for the students first and last name.
+//     * Compare the students last name to see if they are equal, less than , or 
+//     * greater than in order to sort.
+//     * @param s
+//     * @return 
+//     */
+//    @Override
+//    public int compareTo(Student s) {
+//        int check = this.last.toLowerCase().compareTo(s.last().toLowerCase());
+//        if (check == 0) {
+//            return this.first.toLowerCase().compareTo(s.first().toLowerCase());
+//        }
+//        return check;
+//    }
+    
+    /** An equals function that tests if a student is equal to another student
+     * An equals function that tests if a student is equal to another student
+     * @param o Student - the student to test
+     * @return True or False
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o == this){
+            return true;
+        }
+        if (!(o instanceof Student)){
+            return false;
+        }
+        Student myStu = (Student)o;
+        return Double.compare(this.gpa, myStu.gpa()) == 0 && 
+                this.last().toLowerCase().equals(myStu.last().toLowerCase()) && 
+                this.first().toLowerCase().equals(myStu.first().toLowerCase()) &&
+                this.id.equals(myStu.id());
+                
+    }
+}
